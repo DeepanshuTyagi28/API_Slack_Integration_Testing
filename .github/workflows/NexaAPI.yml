@@ -37,18 +37,3 @@ workflow_dispatch:
         options: [ "staging", "dev" ]
         default: "staging"
         required: true
-
-env:
-  NAME: "CMS-Nexa"
-  WEB_UI_GROUPS: "Stage"
-  XML_SUITE: "TestNG.xml"
-  ENV: "Stage"
-
-jobs:
-  build:
-    runs-on: cms-web
-    outputs:
-      test_percentage: ${{ steps.test.outputs.percent }}
-    steps:
-      - name: Checkout ${{ github.ref_name }}
-        uses: actions/checkout@v3
