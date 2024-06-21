@@ -7,6 +7,23 @@ on:
   schedule:
     - cron: '15 14 * * 0,1,2,3,4,5'
     - cron: '30 5 * * 0,1,2,3,4,5'
+  workflow_dispatch:
+    inputs:
+      XML_SUITE:
+        description: "Path to testNG xml"
+        default: "regression-suite.xml"
+        required: false
+      GROUPS:
+        description: "Group(s) to run"
+        default: "regression"
+        required: true
+      ENV:
+        description: "Environment to run"
+        default: "stage"
+        required: true
+        options:
+          - stage
+          - Prod
 
 jobs:
   build:
@@ -25,14 +42,14 @@ jobs:
       - name: Build with Maven
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
-          mvn clean test | tee result.log  # Pipe output to a file for further processing
-          echo "##vso[task.setvariable variable=percent]$(grep -oP '\d+(?=% Passed)' result.log)"
+          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee result.log
+          echo "##vso[task.setvariable variable=percent]$(grep -oP '\d+(?=% Passed)' result.log || echo '0')"
 
       - name: Validate Passed Rate
         if: ${{ github.event.inputs.UP_STREAM != '' }}
         run: |
           echo "${{ env.percent }}% Passed Rate"
-          # Replace with your validation logic using the passed rate
+          # Add your validation logic here using the passed rate
           # Example: echo "$PERCENTAGE, $SHA, $REPO"
 
           # Assuming the validate-dev-repo action script usage
