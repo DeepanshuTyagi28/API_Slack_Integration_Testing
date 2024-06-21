@@ -56,7 +56,7 @@ jobs:
         if: ${{ github.event.inputs.UP_STREAM != '' }}
         uses: ./.github/actions/validate-dev-repo
         with:
-          PERCENTAGE: ${{ steps.build_maven.outputs.percent }}
+          PERCENTAGE: ${{ steps.test.outputs.percent}}
           SHA: ${{ github.sha }}
           REPO: ${{ github.repository }}
         env:
