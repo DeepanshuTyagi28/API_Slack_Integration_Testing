@@ -23,5 +23,5 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Maven
-        working-directory: API_Slack_Integration_Testing\nexa_api-master
+        working-directory: nexa_api-master
         run: mvn clean test
