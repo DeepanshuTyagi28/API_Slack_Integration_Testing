@@ -67,7 +67,7 @@ jobs:
         with:
           payload: |
             {
-              "channel": "#your-slack-channel",
+              "channel": "slackintegrationnexa",
               "attachments": [
                 {
                   "color": "good",
