@@ -18,8 +18,6 @@ jobs:
         name: Say Goodbye
         run: echo "Goodbye!"
 
----------------------------------------------------------------------------------------------
-
 name: NEXA API Test
 run-name: ${{ github.actor }} is testing Lumi Cms Web Test on ${{ github.ref_name }}
 on:
