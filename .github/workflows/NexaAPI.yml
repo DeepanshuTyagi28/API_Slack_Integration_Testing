@@ -124,21 +124,10 @@ jobs:
                       "title": "Passed Percentage",
                       "value": "${{ steps.build_maven.outputs.percent }}%",
                       "short": true
-                    },
-                    {
-                      "title": "Branch",
-                      "value": "${{ github.ref }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Commit",
-                      "value": "${{ github.sha }}",
-                      "short": true
                     }
-                  ],
-                  "footer": "GitHub Actions",
-                  "footer_icon": "https://github.githubassets.com/favicon.ico",
-                  "ts": ""
+                
+                  ]
+                 
                 }
               ]
             }
