@@ -96,7 +96,7 @@ jobs:
                   ],
                   "footer": "GitHub Actions",
                   "footer_icon": "https://github.githubassets.com/favicon.ico",
-                  "ts": $(date +%s)
+                  "ts": "$(date +%s)"
                 }
               ]
             }
@@ -138,7 +138,7 @@ jobs:
                   ],
                   "footer": "GitHub Actions",
                   "footer_icon": "https://github.githubassets.com/favicon.ico",
-                  "ts": $(date +%s)
+                  "ts": "$(date +%s)"
                 }
               ]
             }
