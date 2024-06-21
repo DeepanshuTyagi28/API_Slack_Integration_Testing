@@ -1,14 +1,10 @@
-name: Nexa API Integration
+name: Nexa API Integration Testing
 on:
-  push:
+ push:
 jobs:
-  say-hello:
+  SendOTPAPI :
     runs-on: ubuntu-latest
     steps:
       -
-        name: Nexa API Try
+        name: Nexa API 
         run: echo "Hello world! I am new"
-    
-      -
-        name: Say Goodbye
-        run: echo "Goodbye! To My program"
