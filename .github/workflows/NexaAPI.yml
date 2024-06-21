@@ -1,6 +1,6 @@
 name: Nexa API Integration Testing
 on:
-  push:
+ push:
     branches:
       - main 
 jobs:
@@ -8,5 +8,5 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Build and test with Maven
+      - name: RUN Maven
         run: mvn clean test 
