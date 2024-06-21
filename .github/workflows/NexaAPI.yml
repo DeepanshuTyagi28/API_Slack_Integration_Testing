@@ -1,30 +1,11 @@
 name: hello-world-example
 on:
   push:
-jobs:
-  say-hello:
-    runs-on: ubuntu-latest
-    steps:
-      -
-        name: Say Hello
-        run: echo "Hello world!"
-      -
-        name: Do stuff
-        run: |
-          echo "Step 1..."
-          echo "Step 2..."
-          echo "Step 3..."
-      -
-        name: Say Goodbye
-        run: echo "Goodbye!"
-
-name: NEXA API Test
-run-name: ${{ github.actor }} is testing Lumi Cms Web Test on ${{ github.ref_name }}
-on:
-  schedule: ## Schedule the job to run at 9.30 am and 6.15pm Dubai time (All days except saturday).
+schedule: ## Schedule the job to run at 9.30 am and 6.15pm Dubai time (All days except saturday).
     - cron: '15 14 * * 0,1,2,3,4,5'
     - cron: '30 5 * * 0,1,2,3,4,5'
-  workflow_dispatch:
+
+workflow_dispatch:
     inputs:
       XML_SUITE:
         type: string
@@ -56,16 +37,12 @@ on:
         options: [ "staging", "dev" ]
         default: "staging"
         required: true
+
 env:
-  NAME: "CMS"
-  PROJECT_ROOT_DIR: "lumi-cms-web-tests"
-  WEB_UI_GROUPS: "regression"
-  XML_SUITE: ${{ github.event.inputs.XML_SUITE != '' && github.event.inputs.XML_SUITE || 'regression-suite.xml' }}
-  ENV: ${{ github.event.inputs.ENV != '' && github.event.inputs.ENV || 'staging' }}
-  RETRY_ENABLED: ${{ github.event.inputs.RETRY_ENABLED != '' && github.event.inputs.RETRY_ENABLED || false }}
-  MAX_RETRY_COUNT: ${{ github.event.inputs.RETRY_COUNT != '' && github.event.inputs.RETRY_COUNT || 1 }}
-  PLATFORM: "WEB-CMS"
-  SLACK_CHANNEL: "#web-cms-automation-report"
+  NAME: "CMS-Nexa"
+  WEB_UI_GROUPS: "Stage"
+  XML_SUITE: "TestNG.xml"
+  ENV: "Stage"
 
 jobs:
   build:
@@ -75,48 +52,3 @@ jobs:
     steps:
       - name: Checkout ${{ github.ref_name }}
         uses: actions/checkout@v3
-
-      - name: Setup env
-        uses: ./.github/actions/setup-env
-        with:
-          UP_STREAM: ${{ inputs.UP_STREAM }}
-
-      - name: Triggered by PR:${{ env.PR_NUMBER }} | Repo:${{ env.REPO }}
-        if: ${{ github.event.inputs.UP_STREAM != '' }}
-        uses: ./.github/actions/set-checks-and-prepare-for-run
-        with:
-          APP_NAME: 'CMS_BASE'
-          URL: 'https://${{ env.URL }}'
-        env:
-          ORG_TOKEN: ${{ secrets.ORG_TOKEN }}
-
-      - name: Create Report Portal Properties
-        uses: ./.github/actions/setup-report-portal
-        with:
-          REPORTPORTAL_USER_TOKEN: ${{ secrets.REPORTPORTAL_USER_TOKEN }}
-
-      - id: test
-        name: Running Test Cases
-        shell: bash
-        run: |
-          mvn clean install -U -DskipTests=true
-          mvn test -pl ${{ env.PROJECT_ROOT_DIR }} -am "-Dgroups=${{ inputs.RUN_GROUP }}" "-Denv=${{ env.ENV }}" -Pskip_api_tests
-          export passPercent=$(jq -r .passPercentage ${{ env.PROJECT_ROOT_DIR }}/testResult.json)
-          echo "percent=$passPercent" >> "$GITHUB_OUTPUT"
-
-      - name: ${{ steps.test.outputs.percent }}% Passed Rate
-        if: ${{ github.event.inputs.UP_STREAM != '' }}
-        uses: ./.github/actions/validate-dev-repo
-        with:
-          PERCENTAGE: ${{ steps.test.outputs.percent }}
-          SHA: ${{ env.SHA }}
-          REPO: ${{ env.REPO }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
-
-      - name: Post Slack Message
-        uses: ./.github/actions/slack-hook
-        with:
-          TRIGGER_ACTOR: ${{ env.ACTOR }}
-          REPORTPORTAL_USER_TOKEN: ${{ secrets.REPORTPORTAL_USER_TOKEN }}
-          SLACK_WEBHOOK: https://hooks.slack.com/services/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
