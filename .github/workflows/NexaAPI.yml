@@ -62,14 +62,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
 
-      - name: Send notification to Slack (Success with 0 % passed)
+ - name: Send notification to Slack (Success with 100% passed)
         if: success() && steps.build_maven.outputs.percent == 0
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
             {
               "channel": "slackintegrationnexa",
-
               "attachments": [
                 {
                   "color": "good",
@@ -84,11 +83,21 @@ jobs:
                       "title": "Passed Percentage",
                       "value": "100%",
                       "short": true
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "${{ github.ref }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Commit",
+                      "value": "${{ github.sha }}",
+                      "short": true
                     }
-                    
                   ],
                   "footer": "GitHub Actions",
                   "footer_icon": "https://github.githubassets.com/favicon.ico",
+                  "ts": "$(date +%s)"
                 }
               ]
             }
