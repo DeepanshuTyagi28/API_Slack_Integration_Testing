@@ -1,39 +1,14 @@
-name: hello-world-example
+name: Nexa API Integration
 on:
   push:
-schedule: ## Schedule the job to run at 9.30 am and 6.15pm Dubai time (All days except saturday).
-    - cron: '15 14 * * 0,1,2,3,4,5'
-    - cron: '30 5 * * 0,1,2,3,4,5'
-
-workflow_dispatch:
-    inputs:
-      XML_SUITE:
-        type: string
-        description: "Path to testNG xml"
-        default: "regression-suite.xml"
-        required: false
-      GROUPS:
-        type: string
-        description: "Group(s) to run"
-        default: "regression"
-        required: true
-      RETRY_ENABLED:
-        type: boolean
-        description: "Enable retry"
-        default: false
-        required: false
-      RETRY_COUNT:
-        type: number
-        description: "Number of retry"
-        default: 1
-        required: false
-      UP_STREAM:
-        type: string
-        description: "Context from upstream repo, please send detail PR_NUMBER , REPO, SHA, ACTOR and URL of on-demand env"
-        required: false
-      ENV:
-        type: choice
-        description: "Environment to run"
-        options: [ "staging", "dev" ]
-        default: "staging"
-        required: true
+jobs:
+  say-hello:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Nexa API Try
+        run: echo "Hello world! I am new"
+    
+      -
+        name: Say Goodbye
+        run: echo "Goodbye! To My program"
