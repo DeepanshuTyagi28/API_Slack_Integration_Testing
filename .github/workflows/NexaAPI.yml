@@ -47,7 +47,7 @@ jobs:
         id: build_maven
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
-          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee result.log
+          mvn clean test -DxmlSuite="${{ github.event.inputs.XML_SUITE }}" -Dgroups="${{ github.event.inputs.GROUPS }}" -Denv="${{ github.event.inputs.ENV }}" | tee result.log
           percent=$(grep -oP '\d+(?=% Passed)' result.log || echo '0')
           echo "::set-output name=percent::$percent"
 
@@ -96,7 +96,7 @@ jobs:
                   ],
                   "footer": "GitHub Actions",
                   "footer_icon": "https://github.githubassets.com/favicon.ico",
-                  "ts": "$(date +%s)"
+                  "ts": ""
                 }
               ]
             }
@@ -138,7 +138,7 @@ jobs:
                   ],
                   "footer": "GitHub Actions",
                   "footer_icon": "https://github.githubassets.com/favicon.ico",
-                  "ts": "$(date +%s)"
+                  "ts": ""
                 }
               ]
             }
