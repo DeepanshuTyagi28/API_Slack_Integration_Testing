@@ -45,11 +45,12 @@ jobs:
 
       - name: Build with Maven
         id: build_maven
-        working-directory: nexa_api-master  # Specify the directory where pom.xml exists
+        working-directory: nexa_api-master
         run: |
           mvn clean test -DxmlSuite="${{ github.event.inputs.XML_SUITE }}" -Dgroups="${{ github.event.inputs.GROUPS }}" -Denv="${{ github.event.inputs.ENV }}" | tee result.log
           percent=$(grep -oP '\d+(?=% Passed)' result.log || echo '0')
-          echo "::set-output name=percent::$percent"
+          percent_int=$((percent))  # Convert to integer
+          echo "::set-output name=percent::$percent_int"
 
       - name: Validate Passed Rate
         if: ${{ github.event.inputs.UP_STREAM != '' }}
@@ -62,7 +63,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
 
       - name: Send notification to Slack (Success with 100% passed)
-        if: success() && steps.build_maven.outputs.percent == '100'
+        if: success() && steps.build_maven.outputs.percent == 100
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
@@ -96,7 +97,7 @@ jobs:
                   ],
                   "footer": "GitHub Actions",
                   "footer_icon": "https://github.githubassets.com/favicon.ico",
-                  "ts": ""
+                  "ts": "$(date +%s)"
                 }
               ]
             }
@@ -104,7 +105,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Send notification to Slack (Failure or not 100% passed)
-        if: failure() || steps.build_maven.outputs.percent != '100'
+        if: failure() || steps.build_maven.outputs.percent != 100
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
@@ -124,10 +125,21 @@ jobs:
                       "title": "Passed Percentage",
                       "value": "${{ steps.build_maven.outputs.percent }}%",
                       "short": true
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "${{ github.ref }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Commit",
+                      "value": "${{ github.sha }}",
+                      "short": true
                     }
-                
-                  ]
-                 
+                  ],
+                  "footer": "GitHub Actions",
+                  "footer_icon": "https://github.githubassets.com/favicon.ico",
+                  "ts": "$(date +%s)"
                 }
               ]
             }
