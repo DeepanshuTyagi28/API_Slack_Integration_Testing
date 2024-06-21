@@ -40,23 +40,19 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Maven
+        id: test
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
           mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee result.log
-          echo "##vso[task.setvariable variable=percent]$(grep -oP '\d+(?=% Passed)' result.log || echo '0')"
+          percent=$(grep -oP '\d+(?=% Passed)' result.log || echo '0')
+          echo "percent=$percent" >> $GITHUB_ENV
 
       - name: Validate Passed Rate
         if: ${{ github.event.inputs.UP_STREAM != '' }}
-        run: |
-          echo "${{ env.percent }}% Passed Rate"
-          # Add your validation logic here using the passed rate
-          # Example: echo "$PERCENTAGE, $SHA, $REPO"
-
-          # Assuming the validate-dev-repo action script usage
-          # uses: ./.github/actions/validate-dev-repo
-          # with:
-          #   PERCENTAGE: ${{ env.percent }}
-          #   SHA: ${{ github.sha }}
-          #   REPO: ${{ github.repository }}
+        uses: ./.github/actions/validate-dev-repo
+        with:
+          PERCENTAGE: ${{ env.percent }}
+          SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
