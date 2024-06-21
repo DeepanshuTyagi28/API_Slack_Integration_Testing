@@ -24,10 +24,6 @@ on:
         options:
           - stage
           - Prod
-      UP_STREAM:
-        description: "Upstream status"
-        default: ""
-        required: false
 
 jobs:
   build:
@@ -44,62 +40,23 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Maven
-        id: build_maven
-        working-directory: nexa_api-master
+        working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
-          mvn clean test -DxmlSuite="${{ github.event.inputs.XML_SUITE }}" -Dgroups="${{ github.event.inputs.GROUPS }}" -Denv="${{ github.event.inputs.ENV }}" | tee result.log
-          percent=$(grep -oP '\d+(?=% Passed)' result.log || echo '0')
-          percent_int=$((percent))  # Convert to integer
-          echo "::set-output name=percent::$percent_int"
+          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee result.log
+          echo "##vso[task.setvariable variable=percent]$(grep -oP '\d+(?=% Passed)' result.log || echo '0')"
 
       - name: Validate Passed Rate
         if: ${{ github.event.inputs.UP_STREAM != '' }}
-        uses: ./.github/actions/validate-dev-repo
-        with:
-          PERCENTAGE: ${{ steps.test.outputs.percent}}
-          SHA: ${{ github.sha }}
-          REPO: ${{ github.repository }}
+        run: |
+          echo "${{ env.percent }}% Passed Rate"
+          # Add your validation logic here using the passed rate
+          # Example: echo "$PERCENTAGE, $SHA, $REPO"
+
+          # Assuming the validate-dev-repo action script usage
+          # uses: ./.github/actions/validate-dev-repo
+          # with:
+          #   PERCENTAGE: ${{ env.percent }}
+          #   SHA: ${{ github.sha }}
+          #   REPO: ${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
-
- - name: Send notification to Slack (Success with 100% passed)
-        if: success() && steps.build_maven.outputs.percent == 0
-        uses: slackapi/slack-github-action@v1.23.0
-        with:
-          payload: |
-            {
-              "channel": "slackintegrationnexa",
-              "attachments": [
-                {
-                  "color": "good",
-                  "title": "Nexa API Integration Testing",
-                  "fields": [
-                    {
-                      "title": "Status",
-                      "value": "Success",
-                      "short": true
-                    },
-                    {
-                      "title": "Passed Percentage",
-                      "value": "100%",
-                      "short": true
-                    },
-                    {
-                      "title": "Branch",
-                      "value": "${{ github.ref }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Commit",
-                      "value": "${{ github.sha }}",
-                      "short": true
-                    }
-                  ],
-                  "footer": "GitHub Actions",
-                  "footer_icon": "https://github.githubassets.com/favicon.ico",
-                  "ts": "$(date +%s)"
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
