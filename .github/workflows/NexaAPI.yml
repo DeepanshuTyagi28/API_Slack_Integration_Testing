@@ -9,4 +9,4 @@ jobs:
 
     steps:
       - name: Build and test with Maven
-        run: mvn clean test TestNG.xml
+        run: mvn clean test 
