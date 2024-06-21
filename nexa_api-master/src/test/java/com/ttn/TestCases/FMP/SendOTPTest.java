@@ -34,7 +34,7 @@ public class SendOTPTest extends BaseLib {
     public void sendOTP_ValidInput(Hashtable<String, String> data) throws EncryptedDocumentException, IOException, SerializeException
     {
     	JsonSerializer jsonSerializer=JsonSerializer.DEFAULT_READABLE;    	
-    	Mobilenumberspojo Mobilenumberspojo = new Mobilenumberspojo("9718676371",data.get("channel"),null);
+    	Mobilenumberspojo Mobilenumberspojo = new Mobilenumberspojo(RandomMobileNumber,data.get("channel"),null);
     	String bodyData=jsonSerializer.serialize(Mobilenumberspojo);
     	SendOTP.validInput(bodyData); 
         Assert.assertEquals(SendOTP.code, 200,"Status Code Validation Failed for Send OTP API");
