@@ -17,3 +17,108 @@ jobs:
       -
         name: Say Goodbye
         run: echo "Goodbye!"
+
+---------------------------------------------------------------------------------------------
+
+name: NEXA API Test
+run-name: ${{ github.actor }} is testing Lumi Cms Web Test on ${{ github.ref_name }}
+on:
+  schedule: ## Schedule the job to run at 9.30 am and 6.15pm Dubai time (All days except saturday).
+    - cron: '15 14 * * 0,1,2,3,4,5'
+    - cron: '30 5 * * 0,1,2,3,4,5'
+  workflow_dispatch:
+    inputs:
+      XML_SUITE:
+        type: string
+        description: "Path to testNG xml"
+        default: "regression-suite.xml"
+        required: false
+      GROUPS:
+        type: string
+        description: "Group(s) to run"
+        default: "regression"
+        required: true
+      RETRY_ENABLED:
+        type: boolean
+        description: "Enable retry"
+        default: false
+        required: false
+      RETRY_COUNT:
+        type: number
+        description: "Number of retry"
+        default: 1
+        required: false
+      UP_STREAM:
+        type: string
+        description: "Context from upstream repo, please send detail PR_NUMBER , REPO, SHA, ACTOR and URL of on-demand env"
+        required: false
+      ENV:
+        type: choice
+        description: "Environment to run"
+        options: [ "staging", "dev" ]
+        default: "staging"
+        required: true
+env:
+  NAME: "CMS"
+  PROJECT_ROOT_DIR: "lumi-cms-web-tests"
+  WEB_UI_GROUPS: "regression"
+  XML_SUITE: ${{ github.event.inputs.XML_SUITE != '' && github.event.inputs.XML_SUITE || 'regression-suite.xml' }}
+  ENV: ${{ github.event.inputs.ENV != '' && github.event.inputs.ENV || 'staging' }}
+  RETRY_ENABLED: ${{ github.event.inputs.RETRY_ENABLED != '' && github.event.inputs.RETRY_ENABLED || false }}
+  MAX_RETRY_COUNT: ${{ github.event.inputs.RETRY_COUNT != '' && github.event.inputs.RETRY_COUNT || 1 }}
+  PLATFORM: "WEB-CMS"
+  SLACK_CHANNEL: "#web-cms-automation-report"
+
+jobs:
+  build:
+    runs-on: cms-web
+    outputs:
+      test_percentage: ${{ steps.test.outputs.percent }}
+    steps:
+      - name: Checkout ${{ github.ref_name }}
+        uses: actions/checkout@v3
+
+      - name: Setup env
+        uses: ./.github/actions/setup-env
+        with:
+          UP_STREAM: ${{ inputs.UP_STREAM }}
+
+      - name: Triggered by PR:${{ env.PR_NUMBER }} | Repo:${{ env.REPO }}
+        if: ${{ github.event.inputs.UP_STREAM != '' }}
+        uses: ./.github/actions/set-checks-and-prepare-for-run
+        with:
+          APP_NAME: 'CMS_BASE'
+          URL: 'https://${{ env.URL }}'
+        env:
+          ORG_TOKEN: ${{ secrets.ORG_TOKEN }}
+
+      - name: Create Report Portal Properties
+        uses: ./.github/actions/setup-report-portal
+        with:
+          REPORTPORTAL_USER_TOKEN: ${{ secrets.REPORTPORTAL_USER_TOKEN }}
+
+      - id: test
+        name: Running Test Cases
+        shell: bash
+        run: |
+          mvn clean install -U -DskipTests=true
+          mvn test -pl ${{ env.PROJECT_ROOT_DIR }} -am "-Dgroups=${{ inputs.RUN_GROUP }}" "-Denv=${{ env.ENV }}" -Pskip_api_tests
+          export passPercent=$(jq -r .passPercentage ${{ env.PROJECT_ROOT_DIR }}/testResult.json)
+          echo "percent=$passPercent" >> "$GITHUB_OUTPUT"
+
+      - name: ${{ steps.test.outputs.percent }}% Passed Rate
+        if: ${{ github.event.inputs.UP_STREAM != '' }}
+        uses: ./.github/actions/validate-dev-repo
+        with:
+          PERCENTAGE: ${{ steps.test.outputs.percent }}
+          SHA: ${{ env.SHA }}
+          REPO: ${{ env.REPO }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
+
+      - name: Post Slack Message
+        uses: ./.github/actions/slack-hook
+        with:
+          TRIGGER_ACTOR: ${{ env.ACTOR }}
+          REPORTPORTAL_USER_TOKEN: ${{ secrets.REPORTPORTAL_USER_TOKEN }}
+          SLACK_WEBHOOK: https://hooks.slack.com/services/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
