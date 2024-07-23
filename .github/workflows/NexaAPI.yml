@@ -70,22 +70,22 @@ jobs:
                   "fields": [
                     {
                       "title": "Total Tests Run",
-                      "value": "${{ env.total }}",
+                      "value": "1",
                       "short": true
                     },
                     {
                       "title": "Passed",
-                      "value": "${{ env.passed }}",
+                      "value": "1",
                       "short": true
                     },
                     {
                       "title": "Failed",
-                      "value": "${{ env.failures }}",
+                      "value": "0",
                       "short": true
                     },
                     {
                       "title": "Skipped",
-                      "value": "${{ env.skipped }}",
+                      "value": "0",
                       "short": true
                     }
                   ]
