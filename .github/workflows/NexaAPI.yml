@@ -44,14 +44,16 @@ jobs:
       - name: Build with Maven
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
-          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee result.log
+          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee nexa_api-master/result.log
+      - name: List files for debugging
+        run: ls -l nexa_api-master
       - name: Parse Test Results
         id: test_results
         run: |
-          total=$(awk '/Tests run:/ {print $3}' result.log | tail -1)
-          failures=$(awk '/Failures:/ {print $6}' result.log | tail -1)
-          errors=$(awk '/Errors:/ {print $8}' result.log | tail -1)
-          skipped=$(awk '/Skipped:/ {print $10}' result.log | tail -1)
+          total=$(awk '/Tests run:/ {print $3}' nexa_api-master/result.log | tail -1)
+          failures=$(awk '/Failures:/ {print $6}' nexa_api-master/result.log | tail -1)
+          errors=$(awk '/Errors:/ {print $8}' nexa_api-master/result.log | tail -1)
+          skipped=$(awk '/Skipped:/ {print $10}' nexa_api-master/result.log | tail -1)
           passed=$((total - failures - errors - skipped))
           echo "total=$total" >> $GITHUB_ENV
           echo "passed=$passed" >> $GITHUB_ENV
