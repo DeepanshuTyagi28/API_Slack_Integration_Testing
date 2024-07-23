@@ -36,17 +36,24 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+
       - name: Set up JDK 11
         uses: actions/setup-java@v2
         with:
           java-version: '11'
           distribution: 'adopt'
+
       - name: Build with Maven
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
           mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee nexa_api-master/result.log
-      - name: List files for debugging
-        run: ls -l nexa_api-master
+
+      - name: Debug: List files in working directory
+        run: ls -alh nexa_api-master
+
+      - name: Debug: Display result.log
+        run: cat nexa_api-master/result.log
+
       - name: Parse Test Results
         id: test_results
         run: |
@@ -54,11 +61,16 @@ jobs:
           failures=$(awk '/Failures:/ {print $6}' nexa_api-master/result.log | tail -1)
           errors=$(awk '/Errors:/ {print $8}' nexa_api-master/result.log | tail -1)
           skipped=$(awk '/Skipped:/ {print $10}' nexa_api-master/result.log | tail -1)
+          if [ -z "$total" ]; then total=0; fi
+          if [ -z "$failures" ]; then failures=0; fi
+          if [ -z "$errors" ]; then errors=0; fi
+          if [ -z "$skipped" ]; then skipped=0; fi
           passed=$((total - failures - errors - skipped))
           echo "total=$total" >> $GITHUB_ENV
           echo "passed=$passed" >> $GITHUB_ENV
           echo "failures=$failures" >> $GITHUB_ENV
           echo "skipped=$skipped" >> $GITHUB_ENV
+
       - name: Send Slack Notification
         if: always()
         uses: slackapi/slack-github-action@v1.23.0
