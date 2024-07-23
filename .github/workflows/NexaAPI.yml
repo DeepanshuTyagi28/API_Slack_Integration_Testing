@@ -23,6 +23,13 @@ on:
         options:
           - stage
           - Prod
+      UP_STREAM:
+        description: "Upstream dependency"
+        required: false
+      SLACK_WEBHOOK_URL:
+        description: "Slack webhook URL"
+        required: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -53,3 +60,45 @@ jobs:
           #   REPO: ${{ github.repository }}
         env:
           GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
+      - name: Send Slack Notification
+        if: success() || failure()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          payload: |
+            {
+              "text": "${{ github.event.inputs.ENV }} build job has finished",
+              "attachments": [
+                {
+                  "color": "{{ job.status == 'success' ? 'good' : 'danger' }}",
+                  "fields": [
+                    {
+                      "title": "Status",
+                      "value": "{{ job.status }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Passed Rate",
+                      "value": "${{ env.percent }}%",
+                      "short": true
+                    },
+                    {
+                      "title": "Repository",
+                      "value": "${{ github.repository }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Branch",
+                      "value": "${{ github.ref }}",
+                      "short": true
+                    },
+                    {
+                      "title": "Commit",
+                      "value": "${{ github.sha }}",
+                      "short": true
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
