@@ -44,23 +44,26 @@ jobs:
           distribution: 'adopt'
 
       - name: Build with Maven
-        working-directory: nexa_api-master  # Specify the directory where pom.xml exists
+        working-directory: ./nexa_api-master  # Specify the directory where pom.xml exists
         run: |
-          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee nexa_api-master/result.log
+          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee result.log
 
-      - name: Debug: List files in working directory
-        run: ls -alh nexa_api-master
+      - name: Debug:List files in working directory
+        working-directory: ./nexa_api-master
+        run: ls -alh
 
-      - name: Debug: Display result.log
-        run: cat nexa_api-master/result.log
+      - name: Debug:Display result.log
+        working-directory: ./nexa_api-master
+        run: cat result.log
 
       - name: Parse Test Results
         id: test_results
+        working-directory: ./nexa_api-master
         run: |
-          total=$(awk '/Tests run:/ {print $3}' nexa_api-master/result.log | tail -1)
-          failures=$(awk '/Failures:/ {print $6}' nexa_api-master/result.log | tail -1)
-          errors=$(awk '/Errors:/ {print $8}' nexa_api-master/result.log | tail -1)
-          skipped=$(awk '/Skipped:/ {print $10}' nexa_api-master/result.log | tail -1)
+          total=$(awk '/Tests run:/ {print $3}' result.log | tail -1)
+          failures=$(awk '/Failures:/ {print $6}' result.log | tail -1)
+          errors=$(awk '/Errors:/ {print $8}' result.log | tail -1)
+          skipped=$(awk '/Skipped:/ {print $10}' result.log | tail -1)
           if [ -z "$total" ]; then total=0; fi
           if [ -z "$failures" ]; then failures=0; fi
           if [ -z "$errors" ]; then errors=0; fi
@@ -80,7 +83,7 @@ jobs:
               "text": "Build job has finished for environment: ${{ github.event.inputs.ENV }}.",
               "attachments": [
                 {
-                  "color": "{{ job.status == 'success' ? 'good' : 'danger' }}",
+                  "color": "${{ job.status == 'success' ? 'good' : 'danger' }}",
                   "fields": [
                     {
                       "title": "Total Tests Run",
