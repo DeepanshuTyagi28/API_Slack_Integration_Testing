@@ -45,55 +45,46 @@ jobs:
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
           mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} | tee result.log
-          echo "##vso[task.setvariable variable=percent]$(grep -oP '\d+(?=% Passed)' result.log || echo '0')"
-      - name: Validate Passed Rate
-        if: ${{ github.event.inputs.UP_STREAM != '' }}
+      - name: Parse Test Results
+        id: test_results
         run: |
-          echo "${{ env.percent }}% Passed Rate"
-          # Add your validation logic here using the passed rate
-          # Example: echo "$PERCENTAGE, $SHA, $REPO"
-          # Assuming the validate-dev-repo action script usage
-          # uses: ./.github/actions/validate-dev-repo
-          # with:
-          #   PERCENTAGE: ${{ env.percent }}
-          #   SHA: ${{ github.sha }}
-          #   REPO: ${{ github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.ORG_TOKEN }}
+          total=$(grep -oP '(?<=Tests run: )\d+' result.log | tail -1)
+          passed=$(grep -oP '(?<=Tests run: \d+, Failures: 0, Errors: 0, Skipped: )\d+' result.log | tail -1)
+          failed=$(grep -oP '(?<=Failures: )\d+' result.log | tail -1)
+          skipped=$(grep -oP '(?<=Skipped: )\d+' result.log | tail -1)
+          echo "::set-output name=total::$total"
+          echo "::set-output name=passed::$passed"
+          echo "::set-output name=failed::$failed"
+          echo "::set-output name=skipped::$skipped"
       - name: Send Slack Notification
-        if: success() || failure()
+        if: always()
         uses: slackapi/slack-github-action@v1.23.0
         with:
           payload: |
             {
-              "text": "${{ github.event.inputs.ENV }} build job has finished",
+              "text": "Build job has finished for environment: ${{ github.event.inputs.ENV }}.",
               "attachments": [
                 {
                   "color": "{{ job.status == 'success' ? 'good' : 'danger' }}",
                   "fields": [
                     {
-                      "title": "Status",
-                      "value": "{{ job.status }}",
+                      "title": "Total Tests Run",
+                      "value": "${{ steps.test_results.outputs.total }}",
                       "short": true
                     },
                     {
-                      "title": "Passed Rate",
-                      "value": "${{ env.percent }}%",
+                      "title": "Passed",
+                      "value": "${{ steps.test_results.outputs.passed }}",
                       "short": true
                     },
                     {
-                      "title": "Repository",
-                      "value": "${{ github.repository }}",
+                      "title": "Failed",
+                      "value": "${{ steps.test_results.outputs.failed }}",
                       "short": true
                     },
                     {
-                      "title": "Branch",
-                      "value": "${{ github.ref }}",
-                      "short": true
-                    },
-                    {
-                      "title": "Commit",
-                      "value": "${{ github.sha }}",
+                      "title": "Skipped",
+                      "value": "${{ steps.test_results.outputs.skipped }}",
                       "short": true
                     }
                   ]
