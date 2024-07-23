@@ -48,14 +48,15 @@ jobs:
       - name: Parse Test Results
         id: test_results
         run: |
-          total=$(grep -oP '(?<=Tests run: )\d+' result.log | tail -1)
-          passed=$(grep -oP '(?<=Tests run: \d+, Failures: 0, Errors: 0, Skipped: )\d+' result.log | tail -1)
-          failed=$(grep -oP '(?<=Failures: )\d+' result.log | tail -1)
-          skipped=$(grep -oP '(?<=Skipped: )\d+' result.log | tail -1)
-          echo "::set-output name=total::$total"
-          echo "::set-output name=passed::$passed"
-          echo "::set-output name=failed::$failed"
-          echo "::set-output name=skipped::$skipped"
+          total=$(awk '/Tests run:/ {print $3}' result.log | tail -1)
+          failures=$(awk '/Failures:/ {print $6}' result.log | tail -1)
+          errors=$(awk '/Errors:/ {print $8}' result.log | tail -1)
+          skipped=$(awk '/Skipped:/ {print $10}' result.log | tail -1)
+          passed=$((total - failures - errors - skipped))
+          echo "total=$total" >> $GITHUB_ENV
+          echo "passed=$passed" >> $GITHUB_ENV
+          echo "failures=$failures" >> $GITHUB_ENV
+          echo "skipped=$skipped" >> $GITHUB_ENV
       - name: Send Slack Notification
         if: always()
         uses: slackapi/slack-github-action@v1.23.0
@@ -69,22 +70,22 @@ jobs:
                   "fields": [
                     {
                       "title": "Total Tests Run",
-                      "value": "${{ steps.test_results.outputs.total }}",
+                      "value": "${{ env.total }}",
                       "short": true
                     },
                     {
                       "title": "Passed",
-                      "value": "${{ steps.test_results.outputs.passed }}",
+                      "value": "${{ env.passed }}",
                       "short": true
                     },
                     {
                       "title": "Failed",
-                      "value": "${{ steps.test_results.outputs.failed }}",
+                      "value": "${{ env.failures }}",
                       "short": true
                     },
                     {
                       "title": "Skipped",
-                      "value": "${{ steps.test_results.outputs.skipped }}",
+                      "value": "${{ env.skipped }}",
                       "short": true
                     }
                   ]
