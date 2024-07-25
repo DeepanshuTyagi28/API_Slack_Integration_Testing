@@ -15,13 +15,14 @@ on:
         required: false
       GROUPS:
         type: string
-        description: "Group(s) to run"
+        description: "Group(s)"
+        options: ["sanity", "Regression"]
         default: "regression"
         required: true
       ENV:
         type: choice
-        description: "Environment to run"
-        options: ["Staging", "Dev"]
+        description: "Environment"
+        options: ["Stage", "Prod"]
         default: "Staging"
         required: true
 
@@ -39,7 +40,7 @@ jobs:
       - name: Build with Maven
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
-          mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=Stage -Dgroups=Sanity -DSheetName=Sanity
+          mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
       - name: Parse Test Results
         id: test_results
         run: |
