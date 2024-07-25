@@ -58,7 +58,12 @@ jobs:
         with:
           payload: |
             {
-              "text": "Build job has finished for environment: ${{ github.event.inputs.ENV }}. Results - Total: ${{ env.total }}, Passed: ${{ env.passed }}, Failures: ${{ env.failures }}, Skipped: ${{ env.skipped }}."
+              "text": "Build job has finished for environment: ${{ github.event.inputs.ENV }}.
+
+            Results - Total: ${{ env.total }},
+            Passed: ${{ env.passed }},
+            Failures: ${{ env.failures }},
+            Skipped: ${{ env.skipped }}."
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
