@@ -39,7 +39,7 @@ jobs:
       - name: Build with Maven
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
-          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }}
+          mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=Stage -Dgroups=Sanity -DSheetName=Sanity
       - name: Parse Test Results
         id: test_results
         run: |
