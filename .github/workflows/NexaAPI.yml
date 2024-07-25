@@ -58,7 +58,6 @@ jobs:
         with:
           payload: |
             {
-              "text": "Build job has Started for environment: ${{ github.event.inputs.ENV }}.",
 
               "text": "Build job has finished for environment: ${{ github.event.inputs.ENV }}.",
            
