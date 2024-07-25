@@ -48,16 +48,21 @@ jobs:
       - name: Parse Test Results
         id: test_results
         run: |
-          echo "Parsing results from target/surefire-reports/result.log"
-          total=$(awk '/Tests run:/ {print $3}' target/surefire-reports/result.log | tail -1)
-          failures=$(awk '/Failures:/ {print $6}' target/surefire-reports/result.log | tail -1)
-          errors=$(awk '/Errors:/ {print $8}' target/surefire-reports/result.log | tail -1)
-          skipped=$(awk '/Skipped:/ {print $10}' target/surefire-reports/result.log | tail -1)
+          # Install xmllint if it's not available
+          sudo apt-get install -y libxml2-utils
+          
+          # Parse testng-results.xml
+          total=$(xmllint --xpath "count(//testcase)" target/surefire-reports/testng-results.xml)
+          failures=$(xmllint --xpath "count(//testcase[failure])" target/surefire-reports/testng-results.xml)
+          errors=$(xmllint --xpath "count(//testcase[error])" target/surefire-reports/testng-results.xml)
+          skipped=$(xmllint --xpath "count(//testcase[skipped])" target/surefire-reports/testng-results.xml)
           passed=$((total - failures - errors - skipped))
+          
           echo "total=$total" >> $GITHUB_ENV
           echo "passed=$passed" >> $GITHUB_ENV
           echo "failures=$failures" >> $GITHUB_ENV
           echo "skipped=$skipped" >> $GITHUB_ENV
+          
           echo "Total: $total"
           echo "Passed: $passed"
           echo "Failures: $failures"
