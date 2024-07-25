@@ -21,7 +21,7 @@ on:
       ENV:
         type: choice
         description: "Environment to run"
-        options: ["Staging", "Dev"] 
+        options: ["Staging", "Dev"]
         default: "Staging"
         required: true
 
@@ -39,7 +39,7 @@ jobs:
       - name: Build with Maven
         working-directory: nexa_api-master  # Specify the directory where pom.xml exists
         run: |
-          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }} 
+          mvn clean test -DxmlSuite=${{ github.event.inputs.XML_SUITE }} -Dgroups=${{ github.event.inputs.GROUPS }} -Denv=${{ github.event.inputs.ENV }}
       - name: Parse Test Results
         id: test_results
         run: |
@@ -58,12 +58,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "Build job has finished for environment: ${{ github.event.inputs.ENV }}.
-
-            Results - Total: ${{ env.total }},
-            Passed: ${{ env.passed }},
-            Failures: ${{ env.failures }},
-            Skipped: ${{ env.skipped }}."
+              "text": "Build job has finished for environment: ${{ github.event.inputs.ENV }}.\n\nResults:\nTotal: ${{ env.total }}\nPassed: ${{ env.passed }}\nFailures: ${{ env.failures }}\nSkipped: ${{ env.skipped }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
