@@ -14,7 +14,7 @@ on:
         default: "regression-suite.xml"
         required: false
       GROUPS:
-        type: string
+        type: choice
         description: "Group(s)"
         options: ["Sanity", "Regression"]
         default: "Sanity"
@@ -59,7 +59,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "Build job has finished for environment: ${{ github.event.inputs.ENV }}.\n\nResults:\nTotal: ${{ env.total }}\nPassed: ${{ env.passed }}\nFailures: ${{ env.failures }}\nSkipped: ${{ env.skipped }}"
+              "text": "Build job has finished for environment: \nEnvironment : ${{ github.event.inputs.ENV }} \nResults:\nTotal: ${{ env.total }}\nPassed: ${{ env.passed }}\nFailures:                              ${{ env.failures }}\nSkipped: ${{ env.skipped }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
