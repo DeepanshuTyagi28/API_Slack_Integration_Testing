@@ -16,14 +16,14 @@ on:
       GROUPS:
         type: string
         description: "Group(s)"
-        options: ["sanity", "Regression"]
-        default: "regression"
+        options: ["Sanity", "Regression"]
+        default: "Sanity"
         required: true
       ENV:
         type: choice
         description: "Environment"
         options: ["Stage", "Prod"]
-        default: "Staging"
+        default: "Stage"
         required: true
 
 jobs:
