@@ -45,6 +45,13 @@ jobs:
         working-directory: nexa_api-master
         run: |
           ls -R
+      
+      - name: Debug .gitignore
+        run: |
+          echo "Listing files that are not ignored:"
+          git ls-files --exclude-standard --others --ignored --exclude-per-directory=.gitignore
+
+
       - name: List files in surefire-reports
         run: |
           ls -R target/surefire-reports
