@@ -41,27 +41,21 @@ jobs:
         working-directory: nexa_api-master
         run: |
           mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
-      - name: List project root
+      - name: List directory after build
+        working-directory: nexa_api-master
         run: |
-          echo "Listing files in the project root:"
           ls -R
-      - name: List files in target before build
+      - name: List files in surefire-reports
         run: |
-          echo "Listing files in target directory before build:"
-          ls -R target
-      - name: Debug Test Results File
-        run: |
-          if [ -f target/surefire-reports/testng-results.xml ]; then
-            echo "File exists: target/surefire-reports/testng-results.xml"
-          else
-            echo "File does not exist: target/surefire-reports/testng-results.xml"
-          fi
+          ls -R target/surefire-reports
       - name: Parse Test Results
         id: test_results
         run: |
+          # Install xmllint if it's not available
           sudo apt-get install -y libxml2-utils
           
-          if [ -f target/surefire-reports/testng-results.xml ]; then
+          # Check if the file exists and has content
+          if [ -f ./target/surefire-reports/testng-results.xml ]; then
             echo "Parsing testng-results.xml"
             total=$(xmllint --xpath "count(//testcase)" target/surefire-reports/testng-results.xml)
             failures=$(xmllint --xpath "count(//testcase[failure])" target/surefire-reports/testng-results.xml)
