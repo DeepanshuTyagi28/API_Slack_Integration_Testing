@@ -41,9 +41,10 @@ jobs:
         working-directory: nexa_api-master
         run: |
           mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
-      - name: List target directory
+      - name: List directory after build
+        working-directory: nexa_api-master
         run: |
-          ls -R target/
+          ls -R
       - name: Parse Test Results
         id: test_results
         run: |
