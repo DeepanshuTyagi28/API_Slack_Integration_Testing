@@ -21,7 +21,7 @@ on:
       ENV:
         type: choice
         description: "Environment to run"
-        options:["Staging", "Dev"] 
+        options: ["Staging", "Dev"] 
         default: "Staging"
         required: true
 
