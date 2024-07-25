@@ -40,22 +40,18 @@ jobs:
       - name: Build with Maven
         working-directory: nexa_api-master
         run: |
-          mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }} > result.log
-
-
-- name: List target directory
-  run: |
-    ls -R target/
-
-
+          mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
+      - name: List target directory
+        run: |
+          ls -R target/
       - name: Parse Test Results
         id: test_results
         run: |
-          echo "Parsing results from result.log"
-          total=$(awk '/Tests run:/ {print $3}' result.log | tail -1)
-          failures=$(awk '/Failures:/ {print $6}' result.log | tail -1)
-          errors=$(awk '/Errors:/ {print $8}' result.log | tail -1)
-          skipped=$(awk '/Skipped:/ {print $10}' result.log | tail -1)
+          echo "Parsing results from target/surefire-reports/result.log"
+          total=$(awk '/Tests run:/ {print $3}' target/surefire-reports/result.log | tail -1)
+          failures=$(awk '/Failures:/ {print $6}' target/surefire-reports/result.log | tail -1)
+          errors=$(awk '/Errors:/ {print $8}' target/surefire-reports/result.log | tail -1)
+          skipped=$(awk '/Skipped:/ {print $10}' target/surefire-reports/result.log | tail -1)
           passed=$((total - failures - errors - skipped))
           echo "total=$total" >> $GITHUB_ENV
           echo "passed=$passed" >> $GITHUB_ENV
@@ -71,7 +67,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "Build job has finished for environment: \n\nEnvironment: ${{ github.event.inputs.ENV }} \nResults:\nTotal: ${{ env.total }}\nPassed: ${{ env.passed }}\nFailures: ${{ env.failures }}\nSkipped: ${{ env.skipped }}"
+              "text": "Build job has finished for environment: \n\n Environment: ${{ github.event.inputs.ENV }} \nResults:\nTotal: ${{ env.total }}\nPassed: ${{ env.passed }}\nFailures: ${{ env.failures }}\nSkipped: ${{ env.skipped }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
