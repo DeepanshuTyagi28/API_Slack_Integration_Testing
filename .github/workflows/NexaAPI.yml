@@ -41,33 +41,26 @@ jobs:
         working-directory: nexa_api-master
         run: |
           mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
-      - name: List current directory
-        run: |
-          echo "Current directory:"
-          pwd
-      - name: List files in the project root
+      - name: List project root
         run: |
           echo "Listing files in the project root:"
-          ls -al
-      - name: List files in target
+          ls -R
+      - name: List files in target before build
         run: |
-          echo "Listing files in target directory:"
+          echo "Listing files in target directory before build:"
           ls -R target
-      - name: List files in surefire-reports
+      - name: Debug Test Results File
         run: |
-          echo "Listing files in target/surefire-reports directory:"
-          ls -R target/surefire-reports || echo "Directory not found or inaccessible"
-      - name: Check directory permissions
-        run: |
-          echo "Checking permissions for surefire-reports directory:"
-          ls -ld target/surefire-reports
+          if [ -f target/surefire-reports/testng-results.xml ]; then
+            echo "File exists: target/surefire-reports/testng-results.xml"
+          else
+            echo "File does not exist: target/surefire-reports/testng-results.xml"
+          fi
       - name: Parse Test Results
         id: test_results
         run: |
-          # Install xmllint if it's not available
           sudo apt-get install -y libxml2-utils
           
-          # Check if the file exists and has content
           if [ -f target/surefire-reports/testng-results.xml ]; then
             echo "Parsing testng-results.xml"
             total=$(xmllint --xpath "count(//testcase)" target/surefire-reports/testng-results.xml)
