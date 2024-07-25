@@ -41,15 +41,25 @@ jobs:
         working-directory: nexa_api-master
         run: |
           mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
-      - name: List directory after build
-        working-directory: nexa_api-master
+      - name: List current directory
         run: |
-          ls -R
+          echo "Current directory:"
+          pwd
+      - name: List files in the project root
+        run: |
+          echo "Listing files in the project root:"
+          ls -al
+      - name: List files in target
+        run: |
+          echo "Listing files in target directory:"
+          ls -R target
       - name: List files in surefire-reports
         run: |
-          ls -R target/surefire-reports
+          echo "Listing files in target/surefire-reports directory:"
+          ls -R target/surefire-reports || echo "Directory not found or inaccessible"
       - name: Check directory permissions
         run: |
+          echo "Checking permissions for surefire-reports directory:"
           ls -ld target/surefire-reports
       - name: Parse Test Results
         id: test_results
