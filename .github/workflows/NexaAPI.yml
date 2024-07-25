@@ -40,7 +40,14 @@ jobs:
       - name: Build with Maven
         working-directory: nexa_api-master
         run: |
-          mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
+          mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }} > result.log
+
+
+- name: List target directory
+  run: |
+    ls -R target/
+
+
       - name: Parse Test Results
         id: test_results
         run: |
@@ -64,7 +71,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "Build job has finished for environment: \n\n Environment: ${{ github.event.inputs.ENV }} \nResults:\nTotal: ${{ env.total }}\nPassed: ${{ env.passed }}\nFailures: ${{ env.failures }}\nSkipped: ${{ env.skipped }}"
+              "text": "Build job has finished for environment: \n\nEnvironment: ${{ github.event.inputs.ENV }} \nResults:\nTotal: ${{ env.total }}\nPassed: ${{ env.passed }}\nFailures: ${{ env.failures }}\nSkipped: ${{ env.skipped }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
