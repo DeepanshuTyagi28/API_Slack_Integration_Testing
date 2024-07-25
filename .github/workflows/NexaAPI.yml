@@ -9,20 +9,22 @@ on:
   workflow_dispatch:
     inputs:
       XML_SUITE:
+        type: string
         description: "Path to testNG xml"
         default: "regression-suite.xml"
         required: false
       GROUPS:
+        type: string
         description: "Group(s) to run"
         default: "regression"
         required: true
       ENV:
+        type: choice
         description: "Environment to run"
-        default: "stage"
+        options:["Staging", "Dev"] 
+        default: "Staging"
         required: true
-        options:
-          - stage
-          - Prod
+
       UP_STREAM:
         description: "Upstream dependency"
         required: false
