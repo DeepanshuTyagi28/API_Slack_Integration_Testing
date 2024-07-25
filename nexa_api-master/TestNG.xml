@@ -8,24 +8,20 @@
 	</listeners>
 	 
         
-        <parameter name="SheetName" value="Sanity"></parameter>  
-        <parameter name="Environment" value="Stage"></parameter>
+        <parameter name="SheetName" value="${SheetName}"></parameter>  
+        <parameter name="Environment" value="${Environment}"></parameter>
         <parameter name="EmailSend" value="no"></parameter>
 
 	<test thread-count="5" name="Test" preserve-order="true">
 		<groups>
 			<run>
-				<include name="Sanity" /> 				   
+				<include name="${SheetName}" /> 				   
 			</run>
 			
 		</groups>
 		<classes>
 
 			<class name="com.ttn.TestCases.FMP.SendOTPTest" />				 	   
-	
-	
-	
-
  
 		</classes>
 	</test>
