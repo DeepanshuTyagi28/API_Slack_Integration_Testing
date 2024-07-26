@@ -45,9 +45,12 @@ jobs:
         working-directory: nexa_api-master
         run: |
           ls -R
-      - name: List files in surefire-reports_Testing
+      - name: List files in surefire-reports
         run: |
           ls -R nexa_api-master/target/surefire-reports
+      - name: Display Test Results XML
+        run: |
+          cat nexa_api-master/target/surefire-reports/testng-results.xml
       - name: Parse Test Results
         id: test_results
         run: |
