@@ -65,13 +65,13 @@ jobs:
             echo "Parsing testng-results.xml"
             
             # Count total test-method elements that are not configuration methods
-            total=$(xmllint --xpath "count(//test-method[not(@is-config='true')])" nexa_api-master/target/surefire-reports/testng-results.xml)
+            total=$(xmllint --xpath "count(//test-method[not(@is-config='true')])" nexa_api-master/target/surefire-reports/testng-results.xml) || { echo "Error parsing total test-method count"; exit 1; }
             
             # Count failed test-method elements
-            failures=$(xmllint --xpath "count(//test-method[not(@is-config='true') and @status='FAIL'])" nexa_api-master/target/surefire-reports/testng-results.xml)
+            failures=$(xmllint --xpath "count(//test-method[not(@is-config='true') and @status='FAIL'])" nexa_api-master/target/surefire-reports/testng-results.xml) || { echo "Error parsing failed test-method count"; exit 1; }
             
             # Count skipped test-method elements
-            skipped=$(xmllint --xpath "count(//test-method[not(@is-config='true') and @status='SKIP'])" nexa_api-master/target/surefire-reports/testng-results.xml)
+            skipped=$(xmllint --xpath "count(//test-method[not(@is-config='true') and @status='SKIP'])" nexa_api-master/target/surefire-reports/testng-results.xml) || { echo "Error parsing skipped test-method count"; exit 1; }
             
             # Calculate passed tests
             passed=$((total - failures - skipped))
