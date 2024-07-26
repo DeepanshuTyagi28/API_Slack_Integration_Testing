@@ -45,26 +45,26 @@ jobs:
         working-directory: nexa_api-master
         run: |
           ls -R
-      - name: List files in surefire-reports
+      - name: List files in surefire-reports_Testing
         run: |
           ls -R nexa_api-master/target/surefire-reports
-      - name: Display Test Results XML
-        run: |
-          cat nexa_api-master/target/surefire-reports/testng-results.xml
+
       - name: Parse Test Results
         id: test_results
         run: |
-          # Install xmllint if it's not available
-          sudo apt-get install -y libxml2-utils
+          # Ensure xmllint is installed
+          if ! command -v xmllint &> /dev/null; then
+            echo "xmllint could not be found, installing..."
+            sudo apt-get install -y libxml2-utils
+          fi
           
           # Check if the file exists and has content
           if [ -f nexa_api-master/target/surefire-reports/testng-results.xml ]; then
             echo "Parsing testng-results.xml"
-            total=$(xmllint --xpath "count(//testcase)" nexa_api-master/target/surefire-reports/testng-results.xml)
-            failures=$(xmllint --xpath "count(//testcase[failure])" nexa_api-master/target/surefire-reports/testng-results.xml)
-            errors=$(xmllint --xpath "count(//testcase[error])" nexa_api-master/target/surefire-reports/testng-results.xml)
-            skipped=$(xmllint --xpath "count(//testcase[skipped])" nexa_api-master/target/surefire-reports/testng-results.xml)
-            passed=$((total - failures - errors - skipped))
+            total=$(xmllint --xpath "count(//test-method)" nexa_api-master/target/surefire-reports/testng-results.xml)
+            failures=$(xmllint --xpath "count(//test-method[@status='FAIL'])" nexa_api-master/target/surefire-reports/testng-results.xml)
+            skipped=$(xmllint --xpath "count(//test-method[@status='SKIP'])" nexa_api-master/target/surefire-reports/testng-results.xml)
+            passed=$((total - failures - skipped))
             
             echo "total=$total" >> $GITHUB_ENV
             echo "passed=$passed" >> $GITHUB_ENV
@@ -79,6 +79,7 @@ jobs:
             echo "testng-results.xml not found or is empty"
             exit 1
           fi
+
       - name: Send Slack Notification
         if: always()
         uses: slackapi/slack-github-action@v1.23.0
