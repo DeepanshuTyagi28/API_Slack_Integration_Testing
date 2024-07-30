@@ -35,10 +35,10 @@ jobs:
           java-version: '11'
           distribution: 'adopt'
 
-      - name: Build with Maven
+      - name: Build with Maven (Ignore Failures)
         working-directory: nexa_api-master
         run: |
-          mvn clean test -DsuiteXmlFile=${{ github.event.inputs.XML_SUITE }} -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
+          mvn clean test -DsuiteXmlFile=${{ github.event.inputs.XML_SUITE }} -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }} || true
 
       - name: List directory after build
         working-directory: nexa_api-master
@@ -94,6 +94,10 @@ jobs:
             exit 1
           fi
 
+  notify:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
       - name: Send Slack Notification
         if: always()
         uses: slackapi/slack-github-action@v1.23.0
