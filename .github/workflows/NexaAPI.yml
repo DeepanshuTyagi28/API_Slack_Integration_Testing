@@ -25,6 +25,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      total: ${{ steps.test_results.outputs.total }}
+      passed: ${{ steps.test_results.outputs.passed }}
+      failures: ${{ steps.test_results.outputs.failures }}
+      skipped: ${{ steps.test_results.outputs.skipped }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -74,10 +79,10 @@ jobs:
             # Calculate passed tests
             passed=$((total - failures - skipped))
 
-            echo "total=$total" >> $GITHUB_ENV
-            echo "passed=$passed" >> $GITHUB_ENV
-            echo "failures=$failures" >> $GITHUB_ENV
-            echo "skipped=$skipped" >> $GITHUB_ENV
+            echo "::set-output name=total::$total"
+            echo "::set-output name=passed::$passed"
+            echo "::set-output name=failures::$failures"
+            echo "::set-output name=skipped::$skipped"
 
             echo "Total: $total"
             echo "Passed: $passed"
@@ -104,7 +109,7 @@ jobs:
         with:
           payload: |
             {
-              "text": "Build job has finished for environment: \n\n Environment: ${{ github.event.inputs.ENV }} \nResults:\nTotal: ${{ env.total }}\nPassed: ${{ env.passed }}\nFailures: ${{ env.failures }}\nSkipped: ${{ env.skipped }}"
+              "text": "Build job has finished for environment: \n\n Environment: ${{ github.event.inputs.ENV }} \nResults:\nTotal: ${{ needs.build.outputs.total }}\nPassed: ${{ needs.build.outputs.passed }}\nFailures: ${{ needs.build.outputs.failures }}\nSkipped: ${{ needs.build.outputs.skipped }}"
             }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
