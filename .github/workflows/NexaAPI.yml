@@ -2,8 +2,8 @@ name: Nexa API Integration Testing
 
 on:
   schedule:
-    - cron: '15 14 * * 0,1,2,3,4,5'
-    - cron: '30 5 * * 0,1,2,3,4,5'
+    - cron: '15 14 * * 0,1,2,3,4,5,6'
+    - cron: '30 5 * * 0,1,2,3,4,5,6'
   workflow_dispatch:
     inputs:
       XML_SUITE:
@@ -12,15 +12,13 @@ on:
         default: "regression-suite.xml"
         required: false
       GROUPS:
-        type: choice
+        type: string
         description: "Group(s)"
-        options: ["Sanity", "Regression"]
         default: "Sanity"
         required: true
       ENV:
-        type: choice
+        type: string
         description: "Environment"
-        options: ["Stage", "Prod"]
         default: "Stage"
         required: true
 
@@ -40,14 +38,14 @@ jobs:
       - name: Build with Maven
         working-directory: nexa_api-master
         run: |
-          mvn clean test -DsuiteXmlFile=TestNG.xml -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
+          mvn clean test -DsuiteXmlFile=${{ github.event.inputs.XML_SUITE }} -DEnvironment=${{ github.event.inputs.ENV }} -Dgroups=${{ github.event.inputs.GROUPS }} -DSheetName=${{ github.event.inputs.GROUPS }}
 
       - name: List directory after build
         working-directory: nexa_api-master
         run: |
           ls -R
 
-      - name: List files in surefire-reports_Testing
+      - name: List files in surefire-reports
         run: |
           ls -R nexa_api-master/target/surefire-reports
 
