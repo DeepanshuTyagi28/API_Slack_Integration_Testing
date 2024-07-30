@@ -83,6 +83,12 @@ jobs:
             echo "Passed: $passed"
             echo "Failures: $failures"
             echo "Skipped: $skipped"
+
+            # Fail the step if there are test failures
+            if [ "$failures" -gt 0 ]; then
+              echo "Test failures detected"
+              exit 1
+            fi
           else
             echo "testng-results.xml not found or is empty"
             exit 1
